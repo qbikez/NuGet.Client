@@ -101,10 +101,8 @@ namespace NuGet.Commands
         {
             request.PackageSaveMode = PackageSaveMode;
 
-            // Read the existing lock file, this is needed to support IsLocked=true
             var lockFilePath = ProjectJsonPathUtilities.GetLockFilePath(request.Project.FilePath);
             request.LockFilePath = lockFilePath;
-            request.ExistingLockFile = LockFileUtilities.GetLockFile(lockFilePath, request.Log);
 
             request.MaxDegreeOfConcurrency =
                 DisableParallel ? 1 : RestoreRequest.DefaultDegreeOfConcurrency;

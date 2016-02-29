@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NuGet.Common;
+using NuGet.ProjectModel;
 
 namespace NuGet.Commands
 {
@@ -109,9 +110,16 @@ namespace NuGet.Commands
                     summaryRequest.InputPath));
 
             // Run the restore
-            var request = summaryRequest.Request;
-            var command = new RestoreCommand(request);
             var sw = Stopwatch.StartNew();
+
+            var request = summaryRequest.Request;
+
+            // Read the existing lock file, this is needed to support IsLocked=true
+            // This is done on the thread and not as part of creating the request due to
+            // how long it takes to load the lock file.
+            request.ExistingLockFile = LockFileUtilities.GetLockFile(request.LockFilePath, log);
+
+            var command = new RestoreCommand(request);
             var result = await command.ExecuteAsync();
 
             // Commit the result
