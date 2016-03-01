@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,14 +46,37 @@ namespace NuGet.Commands
 
         public PackageSaveMode PackageSaveMode { get; set; } = PackageSaveMode.Defaultv3;
 
+        // Cache directory -> ISettings
+        private ConcurrentDictionary<string, ISettings> _settingsCache
+            = new ConcurrentDictionary<string, ISettings>(StringComparer.Ordinal);
+
+        // ISettings -> PackageSourceProvider
+        private ConcurrentDictionary<ISettings, PackageSourceProvider> _sourceProviderCache
+            = new ConcurrentDictionary<ISettings, PackageSourceProvider>();
+
         public ISettings GetSettings(string projectDirectory)
         {
-            return Settings.LoadDefaultSettings(projectDirectory,
-                ConfigFileName,
-                MachineWideSettings);
+            // Ignore settings files inside the project directory itself, instead use the parent folder which 
+            // can be shared and cached between projects.
+            var parent = Directory.GetParent(projectDirectory);
+
+            if (parent == null)
+            {
+                // If the projet was somehow at the root of the drive, just use the project dir
+                parent = new DirectoryInfo(projectDirectory);
+            }
+
+            var parentDirectory = parent.FullName;
+
+            return _settingsCache.GetOrAdd(parentDirectory, (dir) =>
+            {
+                return Settings.LoadDefaultSettings(dir,
+                    ConfigFileName,
+                    MachineWideSettings);
+            });
         }
 
-        public string GetEffectiveGlobalPackagesFolder(string rootDirectory, ISettings settings)
+        public string GetEffectiveGlobalPackagesFolder(string rootDirectory, Lazy<ISettings> settings)
         {
             string globalPath = null;
 
@@ -62,7 +86,7 @@ namespace NuGet.Commands
             }
             else
             {
-                globalPath = SettingsUtility.GetGlobalPackagesFolder(settings);
+                globalPath = SettingsUtility.GetGlobalPackagesFolder(settings.Value);
             }
 
             // Resolve relative paths
@@ -73,24 +97,27 @@ namespace NuGet.Commands
         /// Uses either Sources or Settings, and then adds Fallback sources.
         /// </summary>
         public List<SourceRepository> GetEffectiveSources(
-            ISettings settings)
+            Lazy<ISettings> settings)
         {
-            var packageSourceProvider = new PackageSourceProvider(settings);
-
             // Take the passed in sources
             var packageSources = Sources.Select(s => new PackageSource(s));
+
+            var packageSourceProvider
+                = new Lazy<PackageSourceProvider>(() =>
+                _sourceProviderCache.GetOrAdd(settings.Value, (currentSettings) =>
+                    new PackageSourceProvider(currentSettings)));
 
             // If no sources were passed in use the NuGet.Config sources
             if (!packageSources.Any())
             {
                 // Add enabled sources
-                packageSources = packageSourceProvider.LoadPackageSources().Where(source => source.IsEnabled);
+                packageSources = packageSourceProvider.Value.LoadPackageSources().Where(source => source.IsEnabled);
             }
 
             packageSources = packageSources.Concat(
                 FallbackSources.Select(s => new PackageSource(s)));
 
-            var cachingProvider = CachingSourceProvider ?? new CachingSourceProvider(packageSourceProvider);
+            var cachingProvider = CachingSourceProvider ?? new CachingSourceProvider(packageSourceProvider.Value);
 
             return packageSources.Select(source => cachingProvider.CreateRepository(source))
                 .Distinct()

@@ -91,6 +91,8 @@ namespace NuGet.Commands
             // Determine if this needs to fall back to an older lock file format
             request.LockFileVersion = LockFileUtilities.GetLockFileVersion(externalReferences);
 
+            // The lock file is loaded later since this is an expensive operation
+
             var summaryRequest = new RestoreSummaryRequest(
                 request,
                 project.MSBuildProjectPath,

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using NuGet.Common;
+using NuGet.Configuration;
 using NuGet.ProjectModel;
 
 namespace NuGet.Commands
@@ -63,7 +64,7 @@ namespace NuGet.Commands
             var file = new FileInfo(inputPath);
 
             // Get settings relative to the input file
-            var settings = restoreContext.GetSettings(file.DirectoryName);
+            var settings = new Lazy<ISettings>(() => restoreContext.GetSettings(file.DirectoryName));
 
             var sources = restoreContext.GetEffectiveSources(settings);
 
