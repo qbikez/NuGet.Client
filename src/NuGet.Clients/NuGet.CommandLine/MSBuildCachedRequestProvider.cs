@@ -13,7 +13,6 @@ namespace NuGet.CommandLine
         private readonly RestoreCommandProvidersCache _providerCache;
         private readonly MSBuildProjectReferenceProvider _projectProvider;
 
-        /// <param name="rootPath">Solution root directory.</param>
         public MSBuildCachedRequestProvider(
             RestoreCommandProvidersCache providerCache,
             MSBuildProjectReferenceProvider projectProvider)
@@ -44,10 +43,6 @@ namespace NuGet.CommandLine
             // Get settings relative to the input file
             var settings = restoreContext.GetSettings(rootPath);
 
-            var globalPath = restoreContext.GetEffectiveGlobalPackagesFolder(
-                rootPath,
-                settings);
-
             var entryPoints = _projectProvider.GetEntryPoints();
 
             // Create a request for each top level project with project.json
@@ -58,7 +53,8 @@ namespace NuGet.CommandLine
                     var request = Create(
                         entryPoint,
                         _projectProvider,
-                        restoreContext);
+                        restoreContext,
+                        settings);
 
                     requests.Add(request);
                 }

@@ -50,9 +50,9 @@ namespace NuGet.Commands
         private ConcurrentDictionary<string, ISettings> _settingsCache
             = new ConcurrentDictionary<string, ISettings>(StringComparer.Ordinal);
 
-        // ISettings -> PackageSourceProvider
-        private ConcurrentDictionary<ISettings, PackageSourceProvider> _sourceProviderCache
-            = new ConcurrentDictionary<ISettings, PackageSourceProvider>();
+        // ISettings.Root -> SourceRepositories
+        private ConcurrentDictionary<string, List<SourceRepository>> _sourcesCache
+            = new ConcurrentDictionary<string, List<SourceRepository>>(StringComparer.Ordinal);
 
         public ISettings GetSettings(string projectDirectory)
         {
@@ -76,7 +76,7 @@ namespace NuGet.Commands
             });
         }
 
-        public string GetEffectiveGlobalPackagesFolder(string rootDirectory, Lazy<ISettings> settings)
+        public string GetEffectiveGlobalPackagesFolder(string rootDirectory, ISettings settings)
         {
             string globalPath = null;
 
@@ -86,7 +86,7 @@ namespace NuGet.Commands
             }
             else
             {
-                globalPath = SettingsUtility.GetGlobalPackagesFolder(settings.Value);
+                globalPath = SettingsUtility.GetGlobalPackagesFolder(settings);
             }
 
             // Resolve relative paths
@@ -96,31 +96,48 @@ namespace NuGet.Commands
         /// <summary>
         /// Uses either Sources or Settings, and then adds Fallback sources.
         /// </summary>
-        public List<SourceRepository> GetEffectiveSources(
-            Lazy<ISettings> settings)
+        public List<SourceRepository> GetEffectiveSources(ISettings settings)
         {
-            // Take the passed in sources
-            var packageSources = Sources.Select(s => new PackageSource(s));
-
-            var packageSourceProvider
-                = new Lazy<PackageSourceProvider>(() =>
-                _sourceProviderCache.GetOrAdd(settings.Value, (currentSettings) =>
-                    new PackageSourceProvider(currentSettings)));
-
-            // If no sources were passed in use the NuGet.Config sources
-            if (!packageSources.Any())
+            if (settings == null)
             {
-                // Add enabled sources
-                packageSources = packageSourceProvider.Value.LoadPackageSources().Where(source => source.IsEnabled);
+                throw new ArgumentNullException(nameof(settings));
             }
 
-            packageSources = packageSources.Concat(
-                FallbackSources.Select(s => new PackageSource(s)));
+            return _sourcesCache.GetOrAdd(settings.Root, (root) => GetEffectiveSourcesCore(settings));
+        }
 
-            var cachingProvider = CachingSourceProvider ?? new CachingSourceProvider(packageSourceProvider.Value);
+        private List<SourceRepository> GetEffectiveSourcesCore(ISettings settings)
+        {
+            // Take the passed in sources
+            var packageSources = new HashSet<string>(Sources, StringComparer.Ordinal);
 
-            return packageSources.Select(source => cachingProvider.CreateRepository(source))
-                .Distinct()
+            var packageSourceProvider = new Lazy<PackageSourceProvider>(() 
+                => new PackageSourceProvider(settings));
+
+            // If no sources were passed in use the NuGet.Config sources
+            if (packageSources.Count < 1)
+            {
+                // Add enabled sources
+                var enabledSources = packageSourceProvider.Value
+                        .LoadPackageSources()
+                        .Where(source => source.IsEnabled)
+                        .Select(source => source.Source)
+                        .Distinct(StringComparer.Ordinal)
+                        .ToList();
+
+                packageSources.UnionWith(enabledSources);
+            }
+
+            // Always add fallback sources
+            packageSources.UnionWith(FallbackSources);
+
+            if (CachingSourceProvider == null)
+            {
+                // Create a shared caching provider if one does not exist already
+                CachingSourceProvider = new CachingSourceProvider(packageSourceProvider.Value);
+            }
+
+            return packageSources.Select(source => CachingSourceProvider.CreateRepository(source))
                 .ToList();
         }
 

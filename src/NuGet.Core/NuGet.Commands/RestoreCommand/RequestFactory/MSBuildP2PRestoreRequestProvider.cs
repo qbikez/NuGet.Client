@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using NuGet.Configuration;
 using NuGet.ProjectModel;
 
 namespace NuGet.Commands
@@ -36,7 +37,8 @@ namespace NuGet.Commands
                     var request = Create(
                         entryPoint,
                         msbuildProvider,
-                        restoreContext);
+                        restoreContext,
+                        settingsOverride: null);
 
                     requests.Add(request);
                 }
@@ -61,11 +63,19 @@ namespace NuGet.Commands
         protected virtual RestoreSummaryRequest Create(
             ExternalProjectReference project,
             MSBuildProjectReferenceProvider msbuildProvider,
-            RestoreArgs restoreContext)
+            RestoreArgs restoreContext,
+            ISettings settingsOverride)
         {
             // Get settings relative to the input file
             var rootPath = Path.GetDirectoryName(project.PackageSpecPath);
-            var settings = restoreContext.GetSettings(rootPath);
+
+            var settings = settingsOverride;
+
+            if (settings == null)
+            {
+                settings = restoreContext.GetSettings(rootPath);
+            }
+
             var globalPath = restoreContext.GetEffectiveGlobalPackagesFolder(rootPath, settings);
 
             var sources = restoreContext.GetEffectiveSources(settings);

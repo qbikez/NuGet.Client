@@ -64,7 +64,7 @@ namespace NuGet.Commands
             var file = new FileInfo(inputPath);
 
             // Get settings relative to the input file
-            var settings = new Lazy<ISettings>(() => restoreContext.GetSettings(file.DirectoryName));
+            var settings = restoreContext.GetSettings(file.DirectoryName);
 
             var sources = restoreContext.GetEffectiveSources(settings);
 
