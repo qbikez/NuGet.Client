@@ -34,11 +34,16 @@
         "System.Net.Http": ""
       }
     },
-    "dnxcore50": {
+    "netstandard1.5": {
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
         "System.Net.Http": "4.0.1-rc2-23811"
-      }
+      },
+      "imports": [
+        "dotnet5.6",
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }

@@ -67,8 +67,10 @@
         }
       }
     },
-    "dnxcore50": {
+    "netstandard1.5": {
       "imports": [
+        "dotnet5.6",
+        "dnxcore50",
         "portable-net45+win8"
       ],
       "dependencies": {

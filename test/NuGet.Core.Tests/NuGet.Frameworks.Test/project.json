@@ -19,8 +19,10 @@
         "Moq": "4.2.1510.2205"
       }
     },
-    "dnxcore50": {
+    "netstandard1.5": {
       "imports": [
+        "dotnet5.6",
+        "dnxcore50",
         "portable-net45+win8"
       ],
       "dependencies": {

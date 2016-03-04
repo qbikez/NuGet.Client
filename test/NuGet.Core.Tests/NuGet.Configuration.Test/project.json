@@ -21,8 +21,12 @@
         "Moq": "4.2.1510.2205"
       }
     },
-    "dnxcore50": {
-      "imports": "portable-net45+win8",
+    "netstandard1.5": {
+      "imports": [
+        "dotnet5.6",
+        "dnxcore50",
+        "portable-net45+win8"
+      ],
       "dependencies": {
         "moq.netcore": "4.4.0-beta8",
         "NETStandard.Library": "1.0.0-rc2-23811"

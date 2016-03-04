@@ -10,9 +10,13 @@
     "test": "xunit.runner.dnx"
   },
   "frameworks": {
-    "dnx451": { },
-    "dnxcore50": {
-      "imports": [ "portable-net45+win8" ]
+    "dnx451": {},
+    "netstandard1.5": {
+      "imports": [
+        "dotnet5.6",
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }

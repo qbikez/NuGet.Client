@@ -10,11 +10,16 @@
   },
   "frameworks": {
     "dnx451": {},
-    "dnxcore50": {
+    "netstandard1.5": {
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
         "System.Net.NetworkInformation": "4.0.10-beta-23127"
-      }
+      },
+      "imports": [
+        "dotnet5.6",
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }
