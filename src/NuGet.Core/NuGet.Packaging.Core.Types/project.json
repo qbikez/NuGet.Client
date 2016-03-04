@@ -3,15 +3,21 @@
   "dependencies": {
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     },
-    "NuGet.Frameworks": "3.4.0-*"
+    "NuGet.Frameworks": {
+      "target": "project"
+    }
   },
   "compilationOptions": {
     "warningsAsErrors": true
   },
   "frameworks": {
-    "net45": {},
-    "dnxcore50": {}
+    "net45": { },
+    "dnxcore50": {
+      "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23811"
+      }
+    }
   }
 }

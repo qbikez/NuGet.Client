@@ -14,8 +14,7 @@
     "net45": {},
     "dnxcore50": {
       "dependencies": {
-        "System.Runtime": "4.0.20-*",
-        "System.Collections.Concurrent": "4.0.10-*"
+        "NETStandard.Library": "1.0.0-rc2-23811"
       }
     }
   }

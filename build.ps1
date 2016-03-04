@@ -30,7 +30,11 @@ trap
     exit 1
 }
 
+$CLIRoot=$PSScriptRoot
+$env:DOTNET_INSTALL_DIR=$CLIRoot
+
 . "$PSScriptRoot\build\common.ps1"
+
 
 $RunTests = (-not $SkipTests) -and (-not $Fast)
 
@@ -65,12 +69,12 @@ Invoke-BuildStep 'Cleaning package cache' { Clear-PackageCache } `
 Invoke-BuildStep 'Installing NuGet.exe' { Install-NuGet } `
     -ev +BuildErrors
 
+Invoke-BuildStep 'Installing dotnet CLI' { Install-DotnetCLI } `
+    -ev +BuildErrors
+
 # Restoring tools required for build
 Invoke-BuildStep 'Restoring solution packages' { Restore-SolutionPackages } `
     -skip:$SkipRestore `
-    -ev +BuildErrors
-
-Invoke-BuildStep 'Installing runtime' { Install-DNX CoreCLR; Install-DNX CLR -Default } `
     -ev +BuildErrors
 
 Invoke-BuildStep 'Enabling delayed signing' {

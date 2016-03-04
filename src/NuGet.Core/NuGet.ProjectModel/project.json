@@ -16,7 +16,8 @@
     "dnxcore50": {
       "imports": [ "portable-net45+win8" ],
       "dependencies": {
-        "System.Dynamic.Runtime": "4.0.10-*"
+        "NETStandard.Library": "1.0.0-rc2-23811",
+        "System.Dynamic.Runtime": "4.0.11-rc2-23811"
       }
     }
   }
