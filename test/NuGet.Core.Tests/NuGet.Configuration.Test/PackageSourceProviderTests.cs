@@ -275,7 +275,7 @@ namespace NuGet.Configuration.Test
             // - source b is persisted in <packageSources> and <disabledPackageSources>
             // - source c is not spersisted at all since its IsPersistable is false and it's enabled.
             // - source d is persisted in <disabledPackageSources> only since its IsPersistable is false and it's disabled.
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 #else
             string appDataPath = Environment.GetEnvironmentVariable("AppData");
@@ -1190,7 +1190,7 @@ namespace NuGet.Configuration.Test
             Assert.Null(values[1].Password);
         }
 
-#if !DNXCORE50
+#if !NETSTANDARD1_5
         [Fact]
         public void LoadPackageSourcesReadsCredentialPairsFromSettings()
         {
@@ -1436,7 +1436,7 @@ namespace NuGet.Configuration.Test
             settings.Verify();
         }
 
-#if !DNXCORE50
+#if !NETSTANDARD1_5
         [Fact]
         public void SavePackageSourcesSavesCredentials()
         {
@@ -2320,7 +2320,7 @@ namespace NuGet.Configuration.Test
             }
         }
 
-#if DNXCORE50
+#if NETSTANDARD1_5
         [Fact]
         public void LoadPackageSource_NotDecryptPassword() 
         {

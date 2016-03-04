@@ -122,7 +122,7 @@ namespace NuGet.Protocol.Core.Types
         {
             Version attr = null;
 
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             attr = typeof(Repository).Assembly.GetName().Version;
 #endif
 
@@ -141,7 +141,7 @@ namespace NuGet.Protocol.Core.Types
         {
             string osVersion = string.Empty;
 
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             osVersion = Environment.OSVersion.ToString();
 #endif
             // TODO: return OSVersion for DNXCORE50.

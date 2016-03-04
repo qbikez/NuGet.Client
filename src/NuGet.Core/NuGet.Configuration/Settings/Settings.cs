@@ -1012,7 +1012,7 @@ namespace NuGet.Configuration
             ExecuteSynchronized(() => FileSystemUtility.AddFile(ConfigFilePath, ConfigXDocument.Save));
         }
 
-#if DNXCORE50
+#if NETSTANDARD1_5
         private static Mutex _globalMutex = new Mutex(initiallyOwned: false);
 
         /// <summary>

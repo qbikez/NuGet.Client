@@ -363,13 +363,13 @@ namespace NuGet.Packaging.Test
 </package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             // REVIEW: Unsupported on CoreCLR
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 #endif
 
             // Act && Assert
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => Manifest.ReadFrom(content.AsStream(), validateSchema: true),
                 "The 'hello' attribute is not declared.");
@@ -399,13 +399,13 @@ namespace NuGet.Packaging.Test
 </package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             // REVIEW: Unsupported on CoreCLR
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 #endif
 
             // Act && Assert
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => Manifest.ReadFrom(content.AsStream(), validateSchema: true),
                 "The element 'group' in namespace 'http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd' has incomplete content. List of possible elements expected: 'reference' in namespace 'http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd'.");
@@ -437,7 +437,7 @@ namespace NuGet.Packaging.Test
 </package>";
 
             // Switch to invariant culture to ensure the error message is in english.
-#if !DNXCORE50
+#if !NETSTANDARD1_5
             // REVIEW: Unsupported on CoreCLR
             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 #endif
