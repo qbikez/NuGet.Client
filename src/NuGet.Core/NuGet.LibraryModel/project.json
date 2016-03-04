@@ -1,10 +1,12 @@
 ﻿{
   "version": "3.4.0-*",
   "dependencies": {
-    "NuGet.Versioning": "3.4.0-*",
+    "NuGet.Versioning": {
+      "target": "project"
+    },
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     }
   },
   "compilationOptions": {

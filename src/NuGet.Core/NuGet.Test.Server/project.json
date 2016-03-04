@@ -4,10 +4,12 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "NuGet.Common": "3.4.0-*"
+    "NuGet.Common": {
+      "target": "project"
+    }
   },
   "frameworks": {
-    "dnx451": { },
+    "dnx451": {},
     "dnxcore50": {
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",

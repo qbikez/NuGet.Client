@@ -16,10 +16,12 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "NuGet.Common": "3.4.0-*",
+    "NuGet.Common": {
+      "target": "project"
+    },
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     }
   },
   "frameworks": {

@@ -1,16 +1,16 @@
 ﻿{
   "version": "3.4.0-*",
-    "shared": "*.cs",
-    "frameworks": {
-        "net45": {
-            "frameworkAssemblies": {
-                "System.IO.Compression": ""
-            }
-        },
-        "dnxcore50": {
-          "dependencies": {
-            "NETStandard.Library": "1.0.0-rc2-23811"
-          }
-        }
+  "shared": "*.cs",
+  "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.IO.Compression": ""
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23811"
+      }
     }
+  }
 }

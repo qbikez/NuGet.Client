@@ -7,10 +7,14 @@
     "Newtonsoft.Json": "6.0.4",
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     },
-    "NuGet.Versioning": "3.4.0-*",
-    "NuGet.Frameworks": "3.4.0-*"
+    "NuGet.Versioning": {
+      "target": "project"
+    },
+    "NuGet.Frameworks": {
+      "target": "project"
+    }
   },
   "frameworks": {
     "net45": {
@@ -19,7 +23,9 @@
       }
     },
     "dnxcore50": {
-      "imports": [ "portable-net45+win8" ],
+      "imports": [
+        "portable-net45+win8"
+      ],
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
         "System.ObjectModel": "4.0.11-rc2-23811",

@@ -23,13 +23,13 @@
   "frameworks": {
     "net45": {
       "frameworkAssemblies": {
-            "System.IO.Compression": "",
-            "Microsoft.CSharp": "",
-            "System": "",
-            "System.Core": "",
-            "mscorlib": ""
-        }
-      },
+        "System.IO.Compression": "",
+        "Microsoft.CSharp": "",
+        "System": "",
+        "System.Core": "",
+        "mscorlib": ""
+      }
+    },
     "dnxcore50": {
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811"

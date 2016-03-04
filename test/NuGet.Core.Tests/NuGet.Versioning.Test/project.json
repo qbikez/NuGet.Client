@@ -1,6 +1,8 @@
 ﻿{
   "dependencies": {
-    "NuGet.Versioning": "3.4.0-*",
+    "NuGet.Versioning": {
+      "target": "project"
+    },
     "xunit": "2.1.0",
     "xunit.runner.dnx": "2.1.0-rc1-build204"
   },
@@ -10,7 +12,9 @@
   "frameworks": {
     "dnx451": {},
     "dnxcore50": {
-      "imports": [ "portable-net45+win8" ],
+      "imports": [
+        "portable-net45+win8"
+      ],
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811"
       }

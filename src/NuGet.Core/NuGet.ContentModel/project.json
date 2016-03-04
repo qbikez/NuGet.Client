@@ -6,7 +6,7 @@
   "dependencies": {
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     }
   },
   "frameworks": {

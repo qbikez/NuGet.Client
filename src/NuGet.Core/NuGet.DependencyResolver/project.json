@@ -4,18 +4,26 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "NuGet.Packaging": "3.4.0-*",
-    "NuGet.Protocol.Core.v3": "3.4.0-*",
-    "NuGet.DependencyResolver.Core": "3.4.0-*",
+    "NuGet.Packaging": {
+      "target": "project"
+    },
+    "NuGet.Protocol.Core.v3": {
+      "target": "project"
+    },
+    "NuGet.DependencyResolver.Core": {
+      "target": "project"
+    },
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     }
   },
   "frameworks": {
-    "net45": { },
+    "net45": {},
     "dnxcore50": {
-      "imports": [ "portable-net45+win8" ],
+      "imports": [
+        "portable-net45+win8"
+      ],
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811"
       }

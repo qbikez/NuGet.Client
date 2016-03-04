@@ -11,11 +11,15 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "NuGet.Packaging": "3.4.0-*",
-    "NuGet.Protocol.Core.Types": "3.4.0-*",
+    "NuGet.Packaging": {
+      "target": "project"
+    },
+    "NuGet.Protocol.Core.Types": {
+      "target": "project"
+    },
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     }
   },
   "frameworks": {

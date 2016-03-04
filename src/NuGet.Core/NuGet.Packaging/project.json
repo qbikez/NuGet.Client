@@ -15,13 +15,19 @@
     "warningsAsErrors": true
   },
   "dependencies": {
-    "NuGet.Common": "3.4.0-*",
+    "NuGet.Common": {
+      "target": "project"
+    },
     "NuGet.Shared": {
       "type": "build",
-      "version": "3.4.0-*"
+      "target": "project"
     },
-    "NuGet.Packaging.Core": "3.4.0-*",
-    "NuGet.Logging": "3.4.0-*"
+    "NuGet.Packaging.Core": {
+      "target": "project"
+    },
+    "NuGet.Logging": {
+      "target": "project"
+    }
   },
   "frameworks": {
     "net45": {

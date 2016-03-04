@@ -1,21 +1,21 @@
 ﻿{
   "version": "3.4.0-*",
-    "frameworks": {
-        "net45": {
-            "frameworkAssemblies": {
-                "System.IO.Compression": "",
-                "Microsoft.CSharp": "",
-                "System": "",
-                "System.Core": "",
-                "mscorlib": ""
-            }
-        },
-        "dnxcore50": {
-          "dependencies": {
-            "NETStandard.Library": "1.0.0-rc2-23811",
-            "System.Security.Cryptography.Cng": "4.0.0-rc2-23811",
-            "System.Diagnostics.Process": "4.1.0-rc2-23811"
-          }
-        }
+  "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.IO.Compression": "",
+        "Microsoft.CSharp": "",
+        "System": "",
+        "System.Core": "",
+        "mscorlib": ""
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "NETStandard.Library": "1.0.0-rc2-23811",
+        "System.Security.Cryptography.Cng": "4.0.0-rc2-23811",
+        "System.Diagnostics.Process": "4.1.0-rc2-23811"
+      }
     }
+  }
 }

@@ -8,10 +8,12 @@
   "dependencies": {
     "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
     "Microsoft.NETCore.Platforms": "1.0.1-beta-*",
-    "NuGet.Commands": "3.4.0-*",
+    "NuGet.Commands": {
+      "target": "project"
+    },
     "NuGet.Shared": {
-      "version": "3.4.0-*",
-      "type": "build"
+      "type": "build",
+      "target": "project"
     },
     "System.Runtime.Serialization.Primitives": "4.0.0",
     "Microsoft.Extensions.CommandLineUtils.Sources": {
@@ -31,7 +33,9 @@
       }
     },
     "dnxcore50": {
-      "imports": [ "portable-net45+win8" ],
+      "imports": [
+        "portable-net45+win8"
+      ],
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
         "System.Console": "4.0.0-rc2-23811"

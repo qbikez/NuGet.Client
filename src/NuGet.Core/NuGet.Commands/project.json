@@ -17,15 +17,27 @@
     "../../../tools/compiler/preprocess/Internalization.cs"
   ],
   "dependencies": {
-    "NuGet.Client": "3.4.0-*",
-    "NuGet.ContentModel": "3.4.0-*",
-    "NuGet.ProjectModel": "3.4.0-*",
-    "NuGet.Configuration": "3.4.0-*",
-    "NuGet.DependencyResolver": "3.4.0-*",
-    "NuGet.RuntimeModel": "3.4.0-*",
+    "NuGet.Client": {
+      "target": "project"
+    },
+    "NuGet.ContentModel": {
+      "target": "project"
+    },
+    "NuGet.ProjectModel": {
+      "target": "project"
+    },
+    "NuGet.Configuration": {
+      "target": "project"
+    },
+    "NuGet.DependencyResolver": {
+      "target": "project"
+    },
+    "NuGet.RuntimeModel": {
+      "target": "project"
+    },
     "NuGet.Shared": {
-      "version": "3.4.0-*",
-      "type": "build"
+      "type": "build",
+      "target": "project"
     }
   },
   "frameworks": {
@@ -56,7 +68,9 @@
       }
     },
     "dnxcore50": {
-      "imports": [ "portable-net45+win8" ],
+      "imports": [
+        "portable-net45+win8"
+      ],
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
         "System.Xml.XDocument": "4.0.11-rc2-23811",
