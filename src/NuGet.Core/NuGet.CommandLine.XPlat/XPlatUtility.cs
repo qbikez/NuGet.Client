@@ -32,7 +32,7 @@ namespace NuGet.CommandLine.XPlat
 
         public static void SetConnectionLimit()
         {
-#if !NETSTANDARD1_5
+#if !NETSTANDARDAPP1_5
             // Increase the maximum number of connections per server.
             if (!RuntimeEnvironmentHelper.IsMono)
             {
