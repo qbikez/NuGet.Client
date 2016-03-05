@@ -26,7 +26,7 @@
   },
   "frameworks": {
     "dnx451": {},
-    "netstandard1.5": {
+    "netstandardapp1.5": {
       "dependencies": {
         "NETStandard.Library": "1.0.0-rc2-23811",
         "System.Diagnostics.Process": "4.1.0-rc2-23811"
