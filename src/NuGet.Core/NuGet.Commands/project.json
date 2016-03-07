@@ -47,7 +47,7 @@
         "System.Xml.Linq": ""
       }
     },
-    "dnx451": {
+    "net46": {
       "frameworkAssemblies": {
         "System.Xml": "",
         "System.Xml.Linq": "",

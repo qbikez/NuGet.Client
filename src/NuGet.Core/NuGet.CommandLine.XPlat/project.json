@@ -25,7 +25,7 @@
     "NuGet.CommandLine.XPlat": "NuGet.CommandLine.XPlat"
   },
   "frameworks": {
-    "dnx451": {
+    "net46": {
       "frameworkAssemblies": {
         "Microsoft.Build.Framework": "14.0.0",
         "Microsoft.Build": "14.0.0",

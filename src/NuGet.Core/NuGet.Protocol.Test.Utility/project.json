@@ -9,7 +9,7 @@
     }
   },
   "frameworks": {
-    "dnx451": {
+    "net46": {
       "dependencies": {}
     },
     "netstandard1.5": {
