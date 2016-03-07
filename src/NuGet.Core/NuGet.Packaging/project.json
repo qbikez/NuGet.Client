@@ -32,7 +32,7 @@
   "frameworks": {
     "net45": {
       "frameworkAssemblies": {
-        "mscorlib": "",
+        "System.Runtime": "",
         "System.Xml": "",
         "System.Xml.Linq": "",
         "System.IO.Compression": ""

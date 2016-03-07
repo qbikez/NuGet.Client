@@ -27,5 +27,6 @@
         "System.Threading": ""
       }
     }
-  }
+  },
+  "testRunner": "xunit"
 }

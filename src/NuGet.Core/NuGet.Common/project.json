@@ -7,7 +7,7 @@
         "Microsoft.CSharp": "",
         "System": "",
         "System.Core": "",
-        "mscorlib": ""
+        "System.Runtime": ""
       }
     },
     "netstandard1.5": {
