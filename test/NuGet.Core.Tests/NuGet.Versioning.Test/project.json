@@ -5,9 +5,6 @@
     },
     "xunit": "2.1.0"
   },
-  "commands": {
-    "test": "xunit.runner.dnx"
-  },
   "frameworks": {
     "netstandardapp1.5": {
       "imports": [
@@ -25,7 +22,8 @@
         "Microsoft.CSharp": "",
         "System": "",
         "System.Core": "",
-        "mscorlib": ""
+        "System.Runtime": "",
+        "System.Threading": ""
       }
     }
   },
