@@ -354,28 +354,34 @@ Function Test-XProject {
             Trace-Log "$DotNetExe build --configuration $Configuration"
             & $DotNetExe build --configuration $Configuration
 
-            # Check if dnxcore50 exists in the project.json file
-            $xtestProjectJson = Join-Path $_ "project.json"
-            if (Get-Content $($xtestProjectJson) | Select-String "netstandardapp1.5") {
-                # Run tests for Core CLR
-
-                Trace-Log "$DotNetExe test --configuration $Configuration"
-                & $DotNetExe test --configuration $Configuration
-                if (-not $?) {
-                    Error-Log "Tests failed @""$_"" on CoreCLR. Code: $LASTEXITCODE"
-                }
+            if (-not $?) {
+                Error-Log "Build failed for $directoryName. Code: $LASTEXITCODE"
             }
+            else
+            {
+                # Check if dnxcore50 exists in the project.json file
+                $xtestProjectJson = Join-Path $_ "project.json"
+                if (Get-Content $($xtestProjectJson) | Select-String "netstandardapp1.5") {
+                    # Run tests for Core CLR
 
-            # Run tests for CLR
-            if (Get-Content $($xtestProjectJson) | Select-String "net46") {
-                $htmlOutput = Join-Path $_ "bin\$Configuration\net46\win7-x64\xunit.results.html"
-                $desktopTestAssembly = Join-Path $_ "bin\$Configuration\net46\win7-x64\$directoryName.dll"
+                    Trace-Log "$DotNetExe test --configuration $Configuration"
+                    & $DotNetExe test --configuration $Configuration
+                    if (-not $?) {
+                        Error-Log "Tests failed @""$_"" on CoreCLR. Code: $LASTEXITCODE"
+                    }
+                }
 
-                Trace-Log "$XunitConsole $desktopTestAssembly -html $htmlOutput"
+                # Run tests for CLR
+                if (Get-Content $($xtestProjectJson) | Select-String "net46") {
+                    $htmlOutput = Join-Path $_ "bin\$Configuration\net46\win7-x64\xunit.results.html"
+                    $desktopTestAssembly = Join-Path $_ "bin\$Configuration\net46\win7-x64\$directoryName.dll"
 
-                & $XunitConsole $desktopTestAssembly -html $htmlOutput
-                if (-not $?) {
-                   Error-Log "Tests failed @""$_"" on CLR. Code: $LASTEXITCODE"
+                    Trace-Log "$XunitConsole $desktopTestAssembly -html $htmlOutput"
+
+                    & $XunitConsole $desktopTestAssembly -html $htmlOutput
+                    if (-not $?) {
+                       Error-Log "Tests failed @""$_"" on CLR. Code: $LASTEXITCODE"
+                    }
                 }
             }
 

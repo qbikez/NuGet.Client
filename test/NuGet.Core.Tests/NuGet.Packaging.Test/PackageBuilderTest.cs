@@ -1391,6 +1391,14 @@ Description is required.");
         [Fact]
         public void MalformedDependenciesThrows()
         {
+            // Switch to invariant culture to ensure the error message is in english.
+#if !NETSTANDARDAPP1_5
+            // REVIEW: Unsupported on CoreCLR
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+#endif
+
+            // Act & Assert
+#if !NETSTANDARDAPP1_5
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -1404,14 +1412,6 @@ Description is required.");
     </dependencies>
   </metadata></package>";
 
-            // Switch to invariant culture to ensure the error message is in english.
-#if !NETSTANDARDAPP1_5
-            // REVIEW: Unsupported on CoreCLR
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-#endif
-
-            // Act & Assert
-#if !NETSTANDARDAPP1_5
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'id' is missing.");
 #else
             // Not thrown in CoreCLR
@@ -1445,6 +1445,14 @@ Description is required.");
         public void MissingFileSrcThrows()
         {
             // Act
+            // Switch to invariant culture to ensure the error message is in english.
+#if !NETSTANDARDAPP1_5
+            // REVIEW: Unsupported on CoreCLR
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+#endif
+
+            // Assert
+#if !NETSTANDARDAPP1_5
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
@@ -1461,14 +1469,6 @@ Description is required.");
   </files>
 </package>";
 
-            // Switch to invariant culture to ensure the error message is in english.
-#if !NETSTANDARDAPP1_5
-            // REVIEW: Unsupported on CoreCLR
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-#endif
-
-            // Assert
-#if !NETSTANDARDAPP1_5
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'src' is missing.");
 #else
             // REVIEW: Not thrown in CoreCLR
@@ -1479,6 +1479,8 @@ Description is required.");
         public void MisplacedFileNodeThrows()
         {
             // Arrange
+            // Act & Assert
+#if !NETSTANDARDAPP1_5
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
@@ -1495,8 +1497,6 @@ Description is required.");
   </metadata>
 </package>";
 
-            // Act & Assert
-#if !NETSTANDARDAPP1_5
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
 #else
             // REVIEW: Not thrown in CoreCLR
