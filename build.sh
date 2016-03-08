@@ -53,8 +53,8 @@ $DOTNET build src/NuGet.Core/NuGet.Shared --framework netstandard1.5 --configura
 for testProject in `find test/NuGet.Core.Tests -type f -name project.json`
 do
     if [[ $testProject =~ "NuGet.Protocol.Core.v2.Tests" ]] ||
-       # [[ $testProject =~ "NuGet.Resolver.Test" ]] ||
-       # [[ $testProject =~ "NuGet.Packaging.Test" ]] ||
+       [[ $testProject =~ "NuGet.Resolver.Test" ]] ||
+       [[ $testProject =~ "NuGet.Packaging.Test" ]] ||
        [[ $testProject =~ "NuGet.PackageManagement.Test" ]] ||
        [[ $testProject =~ "NuGet.ProjectManagement.Test" ]];
     then
