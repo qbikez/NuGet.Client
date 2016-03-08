@@ -8,8 +8,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.PlatformAbstractions;
 using Moq;
+using NuGet.Common;
 using NuGet.Test.Utility;
 using Xunit;
 
@@ -2097,7 +2097,7 @@ namespace NuGet.Configuration.Test
                 Assert.Equal("Microsoft and .NET", sources[1].Name);
                 Assert.False(sources[1].IsEnabled);
 
-                if (PlatformServices.Default.Runtime.OperatingSystem.Equals("windows", StringComparison.OrdinalIgnoreCase))
+                if (RuntimeEnvironmentHelper.IsWindows)
                 {
                     Assert.Equal("LocalNuGet", sources[2].Name);
                     Assert.True(sources[2].IsEnabled);
