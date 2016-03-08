@@ -54,11 +54,14 @@ do
         continue
     fi
 	
-	if grep -q dnxcore50 "$testProject"; then
+	if grep -q netstandardapp1.5 "$testProject"; then
          echo "Running tests in $testProject on CoreCLR"
 		 
-		 dnvm use 1.0.0-rc1-update1 -runtime coreclr
-		 dnx --project $testProject test -parallel none
+         echo "$dotnet build $testProject"
+		 $dotnet build $testProject
+
+         echo "$dotnet test $testProject"
+		 $dotnet test $testProject
 		 
 		 if [ $? -ne 0 ]; then
 			echo "$testProject FAILED on CoreCLR"

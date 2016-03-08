@@ -361,8 +361,8 @@ Function Test-XProject {
             if (Get-Content $($xtestProjectJson) | Select-String "netstandardapp1.5") {
                 # Run tests for Core CLR
 
-                Trace-Log "$DotNetExe test --configuration $Configuration"
-                & $DotNetExe test $_  --configuration $Configuration
+                Trace-Log "$DotNetExe test $_ --configuration $Configuration"
+                & $DotNetExe test $_ --configuration $Configuration
                 if (-not $?) {
                     Error-Log "Tests failed @""$_"" on CoreCLR. Code: $LASTEXITCODE"
                 }
