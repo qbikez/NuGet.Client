@@ -29,15 +29,18 @@ Write-Host ""
 
 $BuildErrors = @()
 
-Invoke-BuildStep 'Installing runtime' { Install-DNX CoreCLR; Install-DNX CLR -Default } `
-    -ev +BuildErrors
-
 Invoke-BuildStep 'Updating sub-modules' { Update-SubModules } `
     -skip:($SkipSubModules -or $Fast) `
     -ev +BuildErrors
 
 Invoke-BuildStep 'Cleaning package cache' { Clear-PackageCache } `
     -skip:(-not $CleanCache) `
+    -ev +BuildErrors
+
+Invoke-BuildStep 'Installing NuGet.exe' { Install-NuGet } `
+    -ev +BuildErrors
+
+Invoke-BuildStep 'Installing dotnet CLI' { Install-DotnetCLI } `
     -ev +BuildErrors
 
 Invoke-BuildStep 'Restoring func test projects' { Restore-XProjects -Fast -XProjectsLocation $FuncTestRoot } `

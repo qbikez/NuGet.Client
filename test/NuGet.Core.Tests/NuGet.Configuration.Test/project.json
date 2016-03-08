@@ -30,7 +30,7 @@
         "System": "",
         "System.Core": "",
         "System.Runtime": "",
-        "System.Threading": ""
+        "System.Threading.Tasks": ""
       },
       "dependencies": {
         "Moq": "4.2.1510.2205"

@@ -27,7 +27,7 @@
         "System": "",
         "System.Core": "",
         "System.Runtime": "",
-        "System.Threading": ""
+        "System.Threading.Tasks": ""
       }
     }
   },

@@ -8,6 +8,7 @@ $NuGetClientRoot = Split-Path -Path $PSScriptRoot -Parent
 $MSBuildExe = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\14.0\Bin\msbuild.exe'
 $NuGetExe = Join-Path $NuGetClientRoot '.nuget\nuget.exe'
 $ILMerge = Join-Path $NuGetClientRoot 'packages\ILMerge.2.14.1208\tools\ILMerge.exe'
+$XunitConsole = Join-Path $NuGetClientRoot 'packages\xunit.runner.console.2.1.0\tools\xunit.console.exe'
 $DotNetExe = Join-Path $NuGetClientRoot 'cli\bin\dotnet.exe'
 $Nupkgs = Join-Path $NuGetClientRoot nupkgs
 $Artifacts = Join-Path $NuGetClientRoot artifacts
@@ -332,7 +333,8 @@ Function Test-XProject {
     [CmdletBinding()]
     param(
         [parameter(ValueFromPipeline=$True, Mandatory=$True, Position=0)]
-        [string[]]$XProjectLocations
+        [string[]]$XProjectLocations,
+        [string]$Configuration = $DefaultConfiguration
     )
     Begin {
         # Test assemblies should not be signed
@@ -348,32 +350,36 @@ Function Test-XProject {
         $XProjectLocations | %{
             Trace-Log "Running tests in ""$_"""
 
-            $opts = '-p', $_, 'test'
-            if ($VerbosePreference) {
-                $opts += '-diagnostics', '-verbose'
-            }
-            else {
-                $opts += '-nologo', '-quiet'
-            }
-            Verbose-Log "dnx $opts"
+            $directoryName = Split-Path $_ -Leaf
+
+            # Build 
+            Trace-Log "$DotNetExe build $_ --configuration $Configuration"
+            & $DotNetExe build $_ --configuration $Configuration
 
             # Check if dnxcore50 exists in the project.json file
-            # $xtestProjectJson = Join-Path $_ "project.json"
-            # if (Get-Content $($xtestProjectJson) | Select-String "dnxcore50") {
-            # Run tests for Core CLR
-            #     Use-DNX CoreCLR
-            #     & dnx $opts 2>&1
-            #     if (-not $?) {
-            #         Error-Log "Tests failed @""$_"" on CoreCLR. Code: $LASTEXITCODE"
-            #     }
-            # }
+            $xtestProjectJson = Join-Path $_ "project.json"
+            if (Get-Content $($xtestProjectJson) | Select-String "netstandardapp1.5") {
+                # Run tests for Core CLR
+
+                Trace-Log "$DotNetExe test --configuration $Configuration"
+                & $DotNetExe test $_  --configuration $Configuration
+                if (-not $?) {
+                    Error-Log "Tests failed @""$_"" on CoreCLR. Code: $LASTEXITCODE"
+                }
+            }
 
             # Run tests for CLR
-            # Use-DNX CLR
-            # & dnx $opts 2>&1
-            # if (-not $?) {
-            #    Error-Log "Tests failed @""$_"" on CLR. Code: $LASTEXITCODE"
-            # }
+            if (Get-Content $($xtestProjectJson) | Select-String "net46") {
+                $htmlOutput = Join-Path $_ "bin\$Configuration\net46\win7-x64\xunit.results.html"
+                $desktopTestAssembly = Join-Path $_ "bin\$Configuration\net46\win7-x64\$directoryName.dll"
+
+                Trace-Log "$XunitConsole $desktopTestAssembly -html $htmlOutput"
+
+                & $XunitConsole $desktopTestAssembly -html $htmlOutput
+                if (-not $?) {
+                   Error-Log "Tests failed @""$_"" on CLR. Code: $LASTEXITCODE"
+                }
+            }
         }
     }
     End {}
@@ -383,12 +389,13 @@ Function Test-CoreProjects {
     [CmdletBinding()]
     param(
         [switch]$SkipRestore,
-        [switch]$Fast
+        [switch]$Fast,
+        [string]$Configuration = $DefaultConfiguration
     )
     $XProjectsLocation = Join-Path $NuGetClientRoot test\NuGet.Core.Tests
 
     $xtests = Find-XProjects $XProjectsLocation
-    $xtests | Test-XProject
+    $xtests | Test-XProject -Configuration $Configuration
 }
 
 Function Build-ClientsProjects {
