@@ -345,6 +345,11 @@ Function Test-XProject {
         if (Test-Path Env:\DNX_BUILD_DELAY_SIGN) {
             Remove-Item Env:\DNX_BUILD_DELAY_SIGN
         }
+
+        # NuGet.Shared is a source package and fails when built as part of other projects.
+        $sharedPath = Join-Path $NuGetClientRoot "src\NuGet.Core\NuGet.Shared"
+        Trace-Log "$DotNetExe build $sharedPath --configuration $Configuration"
+        & $DotNetExe build $sharedPath --configuration $Configuration
     }
     Process {
         $XProjectLocations | %{
@@ -352,17 +357,19 @@ Function Test-XProject {
 
             $directoryName = Split-Path $_ -Leaf
 
+            pushd $_
+
             # Build 
-            Trace-Log "$DotNetExe build $_ --configuration $Configuration"
-            & $DotNetExe build $_ --configuration $Configuration
+            Trace-Log "$DotNetExe build --configuration $Configuration"
+            & $DotNetExe build --configuration $Configuration
 
             # Check if dnxcore50 exists in the project.json file
             $xtestProjectJson = Join-Path $_ "project.json"
             if (Get-Content $($xtestProjectJson) | Select-String "netstandardapp1.5") {
                 # Run tests for Core CLR
 
-                Trace-Log "$DotNetExe test $_ --configuration $Configuration"
-                & $DotNetExe test $_ --configuration $Configuration
+                Trace-Log "$DotNetExe test --configuration $Configuration"
+                & $DotNetExe test --configuration $Configuration
                 if (-not $?) {
                     Error-Log "Tests failed @""$_"" on CoreCLR. Code: $LASTEXITCODE"
                 }
@@ -380,6 +387,8 @@ Function Test-XProject {
                    Error-Log "Tests failed @""$_"" on CLR. Code: $LASTEXITCODE"
                 }
             }
+
+            popd
         }
     }
     End {}

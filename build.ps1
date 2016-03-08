@@ -56,6 +56,7 @@ Invoke-BuildStep 'Updating sub-modules' { Update-SubModules } `
     -ev +BuildErrors
 
 Invoke-BuildStep 'Cleaning artifacts' { Clear-Artifacts } `
+    -skip:$SkipXProj `
     -ev +BuildErrors
 
 Invoke-BuildStep 'Cleaning nupkgs' { Clear-Nupkgs } `
@@ -103,17 +104,17 @@ Invoke-BuildStep 'Building NuGet.Clients projects' {
 
 Invoke-BuildStep 'Running NuGet.Core tests' {
         param($SkipRestore, $Fast)
-        Test-CoreProjects -SkipRestore:$SkipRestore -Fast:$Fast
+        Test-CoreProjects -SkipRestore:$SkipRestore -Fast:$Fast -Configuration:$Configuration
     } `
-    -args $SkipRestore, $Fast `
-    -skip:($SkipXProj -or (-not $RunTests)) `
+    -args $SkipRestore, $Fast, $Configuration `
+    -skip:(-not $RunTests) `
     -ev +BuildErrors
 
 Invoke-BuildStep 'Running NuGet.Clients tests' {
         param($Configuration) Test-ClientsProjects $Configuration
     } `
     -args $Configuration `
-    -skip:($SkipCSproj -or (-not $RunTests)) `
+    -skip:(-not $RunTests) `
     -ev +BuildErrors
 
 Invoke-BuildStep 'Merging NuGet.exe' {
