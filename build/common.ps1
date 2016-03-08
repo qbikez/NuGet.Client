@@ -8,7 +8,7 @@ $NuGetClientRoot = Split-Path -Path $PSScriptRoot -Parent
 $MSBuildExe = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\14.0\Bin\msbuild.exe'
 $NuGetExe = Join-Path $NuGetClientRoot '.nuget\nuget.exe'
 $ILMerge = Join-Path $NuGetClientRoot 'packages\ILMerge.2.14.1208\tools\ILMerge.exe'
-$XunitConsole = Join-Path $NuGetClientRoot 'packages\xunit.runner.console.2.1.0\tools\xunit.console.exe'
+$XunitConsole = Join-Path $NuGetClientRoot 'packages\xunit.runner.console.2.1.0\tools\xunit.console.x86.exe'
 $DotNetExe = Join-Path $NuGetClientRoot 'cli\bin\dotnet.exe'
 $Nupkgs = Join-Path $NuGetClientRoot nupkgs
 $Artifacts = Join-Path $NuGetClientRoot artifacts
@@ -337,15 +337,6 @@ Function Test-XProject {
         [string]$Configuration = $DefaultConfiguration
     )
     Begin {
-        # Test assemblies should not be signed
-        if (Test-Path Env:\DNX_BUILD_KEY_FILE) {
-            Remove-Item Env:\DNX_BUILD_KEY_FILE
-        }
-
-        if (Test-Path Env:\DNX_BUILD_DELAY_SIGN) {
-            Remove-Item Env:\DNX_BUILD_DELAY_SIGN
-        }
-
         # NuGet.Shared is a source package and fails when built as part of other projects.
         $sharedPath = Join-Path $NuGetClientRoot "src\NuGet.Core\NuGet.Shared"
         Trace-Log "$DotNetExe build $sharedPath --configuration $Configuration"
