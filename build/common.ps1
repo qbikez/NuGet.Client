@@ -5,6 +5,12 @@ $ValidReleaseLabels = 'Release','rtm', 'rc', 'beta', 'local'
 $DefaultReleaseLabel = 'local'
 
 $NuGetClientRoot = Split-Path -Path $PSScriptRoot -Parent
+
+# allow this to work for scripts/funcTests
+if ((Split-Path -Path $PSScriptRoot -Leaf) -eq "scripts") {
+    $NuGetClientRoot = Split-Path -Path $NuGetClientRoot -Parent
+}
+
 $MSBuildExe = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\14.0\Bin\msbuild.exe'
 $NuGetExe = Join-Path $NuGetClientRoot '.nuget\nuget.exe'
 $ILMerge = Join-Path $NuGetClientRoot 'packages\ILMerge.2.14.1208\tools\ILMerge.exe'
@@ -242,9 +248,9 @@ Function Restore-SolutionPackages{
 # Restore nuget.core.sln projects
 Function Restore-XProjects {
 
-    $opts = 'restore', "src\NuGet.Core", "test\NuGet.Core.Tests", "--verbosity", "minimal"
+    $opts = 'restore', "src\NuGet.Core", "test\NuGet.Core.Tests", "test\NuGet.Core.FuncTests", "--verbosity", "minimal"
 
-    Trace-Log "Restoring packages for @""$NuGetCoreSln"""
+    Trace-Log "Restoring packages for xprojs"
     Verbose-Log "$dotnetExe $opts"
     & $dotnetExe $opts
     if (-not $?) {

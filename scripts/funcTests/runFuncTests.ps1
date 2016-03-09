@@ -21,6 +21,8 @@ $NuGetClientRoot = Split-Path -Path $FuncScriptsRoot -Parent
 $FuncTestRoot = Join-Path $NuGetClientRoot "test\\NuGet.Core.FuncTests"
 $SrcRoot = Join-Path $NuGetClientRoot "src\\NuGet.Core"
 
+pushd $NuGetClientRoot
+
 Write-Host "Dependent Build Details are as follows:"
 Write-Host "Branch: $DepBuildBranch"
 Write-Host "Commit ID: $DepCommitID"
@@ -43,15 +45,14 @@ Invoke-BuildStep 'Installing NuGet.exe' { Install-NuGet } `
 Invoke-BuildStep 'Installing dotnet CLI' { Install-DotnetCLI } `
     -ev +BuildErrors
 
-Invoke-BuildStep 'Restoring func test projects' { Restore-XProjects -Fast -XProjectsLocation $FuncTestRoot } `
-    -ev +BuildErrors
-
-Invoke-BuildStep 'Restoring src projects' { Restore-XProjects -Fast -XProjectsLocation $SrcRoot } `
+Invoke-BuildStep 'Restoring projects' { Restore-XProjects } `
     -ev +BuildErrors
 
 # Run tests
 $xtests = Find-XProjects $FuncTestRoot
 $xtests | Test-XProject
+
+popd
 
 if ($BuildErrors) {
     Trace-Log "Build's completed with following errors:"
