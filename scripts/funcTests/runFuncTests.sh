@@ -45,7 +45,7 @@ then
 fi
 
 # restore packages
-$DOTNET restore src/NuGet.Core test/NuGet.Core.Tests --verbosity minimal
+$DOTNET restore src/NuGet.Core test/NuGet.Core.Tests test/NuGet.Core.FuncTests --verbosity minimal
 if [ $? -ne 0 ]; then
 	echo "Restore failed!!"
 	exit 1
