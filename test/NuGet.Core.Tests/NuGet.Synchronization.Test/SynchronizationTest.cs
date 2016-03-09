@@ -119,11 +119,7 @@ namespace NuGet.Commands.Test
             Assert.False(timeout.IsCancellationRequested);
         }
 
-#if NETSTANDARDAPP1_5
         [Fact(Skip="Unable to make socket connection on the CLI")]
-#else
-        [Fact]
-#endif
         public async Task ConcurrencyUtilityBlocksOutOfProc()
         {
             // Arrange
