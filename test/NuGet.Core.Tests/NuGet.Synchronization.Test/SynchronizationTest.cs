@@ -229,7 +229,7 @@ namespace NuGet.Commands.Test
             Assert.False(timeout.IsCancellationRequested);
         }
 
-        [Fact]
+        [Fact(Skip = "Unable to make socket connection on the CLI")]
         public async Task CrashingCommand()
         {
             // Arrange
