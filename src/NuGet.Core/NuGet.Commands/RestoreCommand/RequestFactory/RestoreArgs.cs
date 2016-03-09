@@ -48,6 +48,8 @@ namespace NuGet.Commands
 
         public int? LockFileVersion { get; set; }
 
+        public bool IgnoreFailedSources { get; set; }
+
         // Cache directory -> ISettings
         private ConcurrentDictionary<string, ISettings> _settingsCache
             = new ConcurrentDictionary<string, ISettings>(StringComparer.Ordinal);
@@ -146,6 +148,8 @@ namespace NuGet.Commands
         public void ApplyStandardProperties(RestoreRequest request)
         {
             request.PackageSaveMode = PackageSaveMode;
+
+            request.IgnoreFailedSources = IgnoreFailedSources;
 
             var lockFilePath = ProjectJsonPathUtilities.GetLockFilePath(request.Project.FilePath);
             request.LockFilePath = lockFilePath;

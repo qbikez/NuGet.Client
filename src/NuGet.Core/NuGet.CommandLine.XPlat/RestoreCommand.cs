@@ -63,6 +63,11 @@ namespace NuGet.CommandLine.XPlat
                     Strings.Restore_Arg_ProjectName_Description,
                     multipleValues: true);
 
+                var ignoreFailedSources = restore.Option(
+                    "-ignoreFailedSources",
+                    Strings.Restore_Switch_IgnoreFailedSource_Description,
+                    CommandOptionType.NoValue);
+
                 restore.OnExecute(async () =>
                 {
                     var log = getLogger();
@@ -92,7 +97,8 @@ namespace NuGet.CommandLine.XPlat
                             RequestProviders = providers,
                             Sources = sources.Values,
                             FallbackSources = fallBack.Values,
-                            CachingSourceProvider = _sourceProvider
+                            CachingSourceProvider = _sourceProvider,
+                            IgnoreFailedSources = ignoreFailedSources.HasValue()
                         };
 
                         var defaultRuntimes = RequestRuntimeUtility.GetDefaultRestoreRuntimes(

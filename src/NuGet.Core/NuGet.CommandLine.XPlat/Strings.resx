@@ -220,4 +220,7 @@
   <data name="Restore_Switch_NoCache_Description" xml:space="preserve">
     <value>Do not cache packages and http requests.</value>
   </data>
+  <data name="Restore_Switch_IgnoreFailedSource_Description" xml:space="preserve">
+    <value>Ignore Failed Source during restore.</value>
+  </data>
 </root>

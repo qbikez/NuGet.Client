@@ -165,6 +165,8 @@ namespace NuGet.Commands
         /// </summary>
         public RestoreCommandProviders DependencyProviders { get; set; }
 
+        public bool IgnoreFailedSources { get; set; }
+
         public void Dispose()
         {
             if (_disposeProviders)

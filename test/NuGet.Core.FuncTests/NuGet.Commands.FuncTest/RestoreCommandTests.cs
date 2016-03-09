@@ -9,6 +9,7 @@ using NuGet.Frameworks;
 using NuGet.LibraryModel;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
+using NuGet.Protocol.Core.Types;
 using NuGet.RuntimeModel;
 using NuGet.Test.Utility;
 using NuGet.Versioning;
@@ -1427,6 +1428,204 @@ namespace NuGet.Commands.FuncTest
                 Assert.Equal(0, installed.Single().Version.Minor);
                 Assert.Equal(20, installed.Single().Version.Patch);
                 // Don't assert the pre-release tag since it may vary
+            }
+        }
+
+        [Fact]
+        public async Task RestoreCommand_RestoreExactVersionWithFailingSource()
+        {
+            // Arrange
+            var sources = new List<PackageSource>();
+            sources.Add(new PackageSource("https://failingSource"));
+            sources.Add(new PackageSource("https://www.nuget.org/api/v2/"));
+
+            using (var packagesDir = TestFileSystemUtility.CreateRandomTestFolder())
+            using (var projectDir = TestFileSystemUtility.CreateRandomTestFolder())
+            {
+                var configJson = JObject.Parse(@"
+                {
+                    ""dependencies"": {
+                        ""Newtonsoft.Json"": ""7.0.1""
+                    },
+                     ""frameworks"": {
+                        ""net45"": { }
+                    }
+                }");
+
+                var specPath = Path.Combine(projectDir, "TestProject", "project.json");
+                var spec = JsonPackageSpecReader.GetPackageSpec(configJson.ToString(), "TestProject", specPath);
+
+                var logger = new TestLogger();
+                var request = new RestoreRequest(spec, sources, packagesDir, logger);
+
+                request.LockFilePath = Path.Combine(projectDir, "project.lock.json");
+
+                var lockFileFormat = new LockFileFormat();
+                var command = new RestoreCommand(request);
+
+                // Act
+                var result = await command.ExecuteAsync();
+
+                // Assert
+                Assert.True(result.Success);
+            }
+        }
+
+        [Fact]
+        public async Task RestoreCommand_RestoreFloatingVersionWithFailingHttpSource()
+        {
+            // Arrange
+            var sources = new List<PackageSource>();
+            sources.Add(new PackageSource("https://failingSource"));
+            sources.Add(new PackageSource("https://www.nuget.org/api/v2/"));
+
+            using (var packagesDir = TestFileSystemUtility.CreateRandomTestFolder())
+            using (var projectDir = TestFileSystemUtility.CreateRandomTestFolder())
+            {
+                var configJson = JObject.Parse(@"
+                {
+                    ""dependencies"": {
+                        ""Newtonsoft.Json"": ""7.0.1-*""
+                    },
+                     ""frameworks"": {
+                        ""net45"": { }
+                    }
+                }");
+
+                var specPath = Path.Combine(projectDir, "TestProject", "project.json");
+                var spec = JsonPackageSpecReader.GetPackageSpec(configJson.ToString(), "TestProject", specPath);
+
+                var logger = new TestLogger();
+                var request = new RestoreRequest(spec, sources, packagesDir, logger);
+
+                request.LockFilePath = Path.Combine(projectDir, "project.lock.json");
+
+                var lockFileFormat = new LockFileFormat();
+                var command = new RestoreCommand(request);
+
+                // Act & Assert
+                var ex = await Assert.ThrowsAsync<FatalProtocolException>(async () => await command.ExecuteAsync());
+                Assert.NotNull(ex);
+            }
+        }
+
+        [Fact]
+        public async Task RestoreCommand_RestoreFloatingVersionWithFailingLocalSource()
+        {
+            // Arrange
+            var sources = new List<PackageSource>();
+            sources.Add(new PackageSource("\\failingSource"));
+            sources.Add(new PackageSource("https://www.nuget.org/api/v2/"));
+
+            using (var packagesDir = TestFileSystemUtility.CreateRandomTestFolder())
+            using (var projectDir = TestFileSystemUtility.CreateRandomTestFolder())
+            {
+                var configJson = JObject.Parse(@"
+                {
+                    ""dependencies"": {
+                        ""Newtonsoft.Json"": ""7.0.1-*""
+                    },
+                     ""frameworks"": {
+                        ""net45"": { }
+                    }
+                }");
+
+                var specPath = Path.Combine(projectDir, "TestProject", "project.json");
+                var spec = JsonPackageSpecReader.GetPackageSpec(configJson.ToString(), "TestProject", specPath);
+
+                var logger = new TestLogger();
+                var request = new RestoreRequest(spec, sources, packagesDir, logger);
+
+                request.LockFilePath = Path.Combine(projectDir, "project.lock.json");
+
+                var lockFileFormat = new LockFileFormat();
+                var command = new RestoreCommand(request);
+
+                // Act & Assert
+                var ex = await Assert.ThrowsAsync<FatalProtocolException>(async () => await command.ExecuteAsync());
+                Assert.NotNull(ex);
+            }
+        }
+
+        [Fact]
+        public async Task RestoreCommand_RestoreFloatingVersionWithIgnoreFailingLocalSource()
+        {
+            // Arrange
+            var sources = new List<PackageSource>();
+            sources.Add(new PackageSource("\\failingSource"));
+            sources.Add(new PackageSource("https://www.nuget.org/api/v2/"));
+
+            using (var packagesDir = TestFileSystemUtility.CreateRandomTestFolder())
+            using (var projectDir = TestFileSystemUtility.CreateRandomTestFolder())
+            {
+                var configJson = JObject.Parse(@"
+                {
+                    ""dependencies"": {
+                        ""Newtonsoft.Json"": ""7.0.1-*""
+                    },
+                     ""frameworks"": {
+                        ""net45"": { }
+                    }
+                }");
+
+                var specPath = Path.Combine(projectDir, "TestProject", "project.json");
+                var spec = JsonPackageSpecReader.GetPackageSpec(configJson.ToString(), "TestProject", specPath);
+
+                var logger = new TestLogger();
+                var request = new RestoreRequest(spec, sources, packagesDir, logger);
+                request.IgnoreFailedSources = true;
+
+                request.LockFilePath = Path.Combine(projectDir, "project.lock.json");
+
+                var lockFileFormat = new LockFileFormat();
+                var command = new RestoreCommand(request);
+
+                // Act
+                var result = await command.ExecuteAsync();
+
+                // Assert
+                Assert.True(result.Success);
+            }
+        }
+
+        [Fact]
+        public async Task RestoreCommand_RestoreFloatingVersionWithIgnoreFailingHttpSource()
+        {
+            // Arrange
+            var sources = new List<PackageSource>();
+            sources.Add(new PackageSource("https://failingSource"));
+            sources.Add(new PackageSource("https://www.nuget.org/api/v2/"));
+
+            using (var packagesDir = TestFileSystemUtility.CreateRandomTestFolder())
+            using (var projectDir = TestFileSystemUtility.CreateRandomTestFolder())
+            {
+                var configJson = JObject.Parse(@"
+                {
+                    ""dependencies"": {
+                        ""Newtonsoft.Json"": ""7.0.1-*""
+                    },
+                     ""frameworks"": {
+                        ""net45"": { }
+                    }
+                }");
+
+                var specPath = Path.Combine(projectDir, "TestProject", "project.json");
+                var spec = JsonPackageSpecReader.GetPackageSpec(configJson.ToString(), "TestProject", specPath);
+
+                var logger = new TestLogger();
+                var request = new RestoreRequest(spec, sources, packagesDir, logger);
+                request.IgnoreFailedSources = true;
+
+                request.LockFilePath = Path.Combine(projectDir, "project.lock.json");
+
+                var lockFileFormat = new LockFileFormat();
+                var command = new RestoreCommand(request);
+
+                // Act
+                var result = await command.ExecuteAsync();
+
+                // Assert
+                Assert.True(result.Success);
             }
         }
 

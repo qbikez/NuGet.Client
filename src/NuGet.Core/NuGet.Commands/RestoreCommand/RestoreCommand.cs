@@ -84,6 +84,7 @@ namespace NuGet.Commands
             }
 
             var context = new RemoteWalkContext();
+            context.IgnoreFailedSources = _request.IgnoreFailedSources;
 
             var graphs = await ExecuteRestoreAsync(localRepository, context, token);
 

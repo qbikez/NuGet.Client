@@ -321,6 +321,15 @@ namespace NuGet.CommandLine.XPlat {
         }
         
         /// <summary>
+        ///    Looks up a localized string similar to Ignore Failed Source during restore..
+        /// </summary>
+        internal static string Restore_Switch_IgnoreFailedSource_Description {
+            get {
+                return ResourceManager.GetString("Restore_Switch_IgnoreFailedSource_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///    Looks up a localized string similar to Do not cache packages and http requests..
         /// </summary>
         internal static string Restore_Switch_NoCache_Description {
