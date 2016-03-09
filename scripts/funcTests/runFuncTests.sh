@@ -11,7 +11,8 @@ done
 RESULTCODE=0
 
 # move up to the repo root
-pushd ../../
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+pushd DIR/../../
 
 # Download the CLI install script to cli
 echo "Installing dotnet CLI"
