@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -72,18 +71,10 @@ namespace NuGet.Commands
                 Path.Combine(_request.Project.BaseDirectory, LockFileFormat.LockFileName) :
                 _request.LockFilePath;
 
-            bool relockFile = false;
-            if (_request.ExistingLockFile != null
-                && _request.ExistingLockFile.IsLocked
-                && !_request.ExistingLockFile.IsValidForPackageSpec(_request.Project, _request.LockFileVersion))
-            {
-                // The lock file was locked, but the project.json is out of date
-                relockFile = true;
-                _request.ExistingLockFile.IsLocked = false;
-                _logger.LogMinimal(Strings.Log_LockFileOutOfDate);
-            }
-            
+            var relockFile = ShouldRelockFile(_request.ExistingLockFile, _request.Project);
+
             var contextForProject = CreateRemoteWalkContext(_request);
+
             var graphs = await ExecuteRestoreAsync(localRepository, contextForProject, token);
 
             // Only execute tool restore if the request lock file version is 2 or greater.
@@ -94,27 +85,14 @@ namespace NuGet.Commands
                 toolRestoreResults = await ExecuteToolRestoresAsync(localRepository, token);
             }
 
-            // Build the lock file
-            LockFile lockFile;
-            if (_request.ExistingLockFile != null && _request.ExistingLockFile.IsLocked)
-            {
-                // No lock file to write!
-                lockFile = _request.ExistingLockFile;
-            }
-            else
-            {
-                lockFile = new LockFileBuilder(_request.LockFileVersion, _logger, _includeFlagGraphs)
-                    .CreateLockFile(
-                        _request.ExistingLockFile,
-                        _request.Project,
-                        graphs,
-                        localRepository,
-                        contextForProject,
-                        toolRestoreResults);
-
-                // If the lock file was locked originally but we are re-locking it, well... re-lock it :)
-                lockFile.IsLocked = relockFile;
-            }
+            var lockFile = BuildLockFile(
+                _request.ExistingLockFile,
+                _request.Project,
+                graphs,
+                localRepository,
+                contextForProject,
+                toolRestoreResults,
+                relockFile);
 
             if(!ValidateRestoreGraphs(graphs, _logger))
             {
@@ -166,6 +144,55 @@ namespace NuGet.Commands
                 toolRestoreResults);
         }
 
+        private LockFile BuildLockFile(
+            LockFile existingLockFile,
+            PackageSpec project,
+            IEnumerable<RestoreTargetGraph> graphs,
+            NuGetv3LocalRepository localRepository,
+            RemoteWalkContext contextForProject,
+            IEnumerable<ToolRestoreResult> toolRestoreResults,
+            bool relockFile)
+        {
+            // Build the lock file
+            LockFile lockFile;
+            if (existingLockFile != null && existingLockFile.IsLocked)
+            {
+                // No lock file to write!
+                lockFile = existingLockFile;
+            }
+            else
+            {
+                lockFile = new LockFileBuilder(_request.LockFileVersion, _logger, _includeFlagGraphs)
+                    .CreateLockFile(
+                        existingLockFile,
+                        project,
+                        graphs,
+                        localRepository,
+                        contextForProject,
+                        toolRestoreResults);
+
+                // If the lock file was locked originally but we are re-locking it, well... re-lock it :)
+                lockFile.IsLocked = relockFile;
+            }
+
+            return lockFile;
+        }
+
+        private bool ShouldRelockFile(LockFile existingLockFile, PackageSpec project)
+        {
+            bool relockFile = false;
+            if (existingLockFile != null
+                && existingLockFile.IsLocked
+                && !existingLockFile.IsValidForPackageSpec(project, _request.LockFileVersion))
+            {
+                // The lock file was locked, but the project.json is out of date
+                relockFile = true;
+                existingLockFile.IsLocked = false;
+                _logger.LogMinimal(Strings.Log_LockFileOutOfDate);
+            }
+            return relockFile;
+        }
+
         private static bool ValidateRestoreGraphs(IEnumerable<RestoreTargetGraph> graphs, ILogger logger)
         {
             foreach (var g in graphs)
@@ -215,7 +242,6 @@ namespace NuGet.Commands
             CancellationToken token)
         {
             var toolPathResolver = new ToolPathResolver(_request.PackagesDirectory);
-            var lockFileBuilder = new LockFileBuilder(_request.LockFileVersion, _logger, _includeFlagGraphs);
             var results = new List<ToolRestoreResult>();
 
             foreach (var tool in _request.Project.Tools)
@@ -250,6 +276,41 @@ namespace NuGet.Commands
                     }
                 };
 
+                // Try to find the existing lock file. Since the existing lock file is pathed under
+                // a folder that includes the resolved tool's version, this is a bit of a chicken
+                // and egg problem. That is, we need to run the restore operation in order to resolve
+                // a tool version, but we need the tool version to find the existing project.lock.json
+                // file which is required before executing the restore! Fortunately, this is solved by
+                // looking at the tool's consuming project's lock file to see if the tool has been
+                // restored before.
+                LockFile existingToolLockFile = null;
+                if (_request.ExistingLockFile != null)
+                {
+                    var existingTarget = _request
+                        .ExistingLockFile
+                        .Tools
+                        .Where(t => t.RuntimeIdentifier == null)
+                        .Where(t => t.TargetFramework.Equals(LockFile.ToolFramework))
+                        .FirstOrDefault();
+
+                    var existingLibrary = existingTarget?.Libraries
+                        .Where(l => StringComparer.OrdinalIgnoreCase.Equals(l.Name, tool.LibraryRange.Name))
+                        .Where(l => tool.LibraryRange.VersionRange.Satisfies(l.Version))
+                        .FirstOrDefault();
+
+                    if (existingLibrary != null)
+                    {
+                        var existingLockFilePath = toolPathResolver.GetLockFilePath(
+                            existingLibrary.Name,
+                            existingLibrary.Version,
+                            existingTarget.TargetFramework);
+
+                        existingToolLockFile = LockFileUtilities.GetLockFile(existingLockFilePath, _logger);
+                    }
+                }
+
+                var relockFile = ShouldRelockFile(existingToolLockFile, toolPackageSpec);
+
                 // Execute the restore.
                 var toolSuccess = true; // success for this individual tool restore
                 var runtimeIds = new HashSet<string>();
@@ -260,7 +321,7 @@ namespace NuGet.Commands
                 var projectRestoreRequest = new ProjectRestoreRequest(
                     _request,
                     toolPackageSpec,
-                    null,
+                    existingToolLockFile,
                     new Dictionary<NuGetFramework, RuntimeGraph>(), 
                     _runtimeGraphCacheByPackage);
                 var projectRestoreCommand = new ProjectRestoreCommand(_logger, projectRestoreRequest);
@@ -282,24 +343,25 @@ namespace NuGet.Commands
                 }
 
                 // Create the lock file (in memory).
-                var lockFile = lockFileBuilder.CreateLockFile(
-                    previousLockFile: null,
-                    project: toolPackageSpec,
-                    targetGraphs: graphs,
-                    repository: localRepository,
-                    context: contextForTool,
-                    toolRestoreResults: Enumerable.Empty<ToolRestoreResult>());
+                var toolLockFile = BuildLockFile(
+                    existingToolLockFile,
+                    toolPackageSpec,
+                    graphs,
+                    localRepository,
+                    contextForTool,
+                    Enumerable.Empty<ToolRestoreResult>(),
+                    relockFile);
 
                 // Build the path based off of the resolved tool. For now, we assume there is only
                 // ever one target.
-                var target = lockFile.Targets.Single();
+                var target = toolLockFile.Targets.Single();
                 var fileTargetLibrary = target
                     .Libraries
                     .FirstOrDefault(l => StringComparer.OrdinalIgnoreCase.Equals(tool.LibraryRange.Name, l.Name));
-                string lockFilePath = null;
+                string toolLockFilePath = null;
                 if (fileTargetLibrary != null)
                 {
-                    lockFilePath = toolPathResolver.GetLockFilePath(
+                    toolLockFilePath = toolPathResolver.GetLockFilePath(
                         fileTargetLibrary.Name,
                         fileTargetLibrary.Version,
                         target.TargetFramework);
@@ -317,8 +379,10 @@ namespace NuGet.Commands
                     toolSuccess,
                     target,
                     fileTargetLibrary,
-                    lockFilePath,
-                    lockFile));
+                    toolLockFilePath,
+                    toolLockFile,
+                    existingToolLockFile,
+                    relockFile));
             }
 
             return results;

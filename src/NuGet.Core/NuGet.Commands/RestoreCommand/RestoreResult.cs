@@ -10,7 +10,7 @@ using NuGet.ProjectModel;
 
 namespace NuGet.Commands
 {
-    public class RestoreResult
+    public class RestoreResult : IRestoreResult
     {
         public bool Success { get; }
 
@@ -114,39 +114,42 @@ namespace NuGet.Commands
             // Write the lock file
             var lockFileFormat = new LockFileFormat();
 
-            // Don't write the lock file if it is Locked AND we're not re-locking the file
-            if (!LockFile.IsLocked || RelockFile)
-            {
-                // Avoid writing out the lock file if it is the same to avoid triggering an intellisense
-                // update on a restore with no actual changes.
-                if (forceWrite
-                    || PreviousLockFile == null
-                    || !PreviousLockFile.Equals(LockFile))
-                {
-                    log.LogDebug($"Writing lock file to disk. Path: {LockFilePath}");
+            Commit(lockFileFormat, this, log, forceWrite);
 
-                    lockFileFormat.Write(LockFilePath, LockFile);
-                }
-                else
-                {
-                    log.LogDebug($"Lock file has not changed. Skipping lock file write. Path: {LockFilePath}");
-                }
-            }
-
-            // Always write the tool lock files
             foreach (var toolRestoreResult in ToolRestoreResults)
             {
-                if (toolRestoreResult.LockFilePath != null)
+                if (toolRestoreResult.LockFilePath != null && toolRestoreResult.LockFile != null)
                 {
-                    log.LogDebug($"Writing tool lock file to disk. Path: {toolRestoreResult.LockFilePath}");
-
                     var lockFileDirectory = Path.GetDirectoryName(toolRestoreResult.LockFilePath);
                     Directory.CreateDirectory(lockFileDirectory);
-                    lockFileFormat.Write(toolRestoreResult.LockFilePath, toolRestoreResult.LockFile);
+
+                    Commit(lockFileFormat, toolRestoreResult, log, forceWrite);
                 }
             }
 
             MSBuild.Commit(log);
+        }
+
+        private static void Commit(LockFileFormat lockFileFormat, IRestoreResult result, ILogger log, bool forceWrite)
+        {
+            // Don't write the lock file if it is Locked AND we're not re-locking the file
+            if (!result.LockFile.IsLocked || result.RelockFile)
+            {
+                // Avoid writing out the lock file if it is the same to avoid triggering an intellisense
+                // update on a restore with no actual changes.
+                if (forceWrite
+                    || result.PreviousLockFile == null
+                    || !result.PreviousLockFile.Equals(result.LockFile))
+                {
+                    log.LogDebug($"Writing lock file to disk. Path: {result.LockFilePath}");
+
+                    lockFileFormat.Write(result.LockFilePath, result.LockFile);
+                }
+                else
+                {
+                    log.LogDebug($"Lock file has not changed. Skipping lock file write. Path: {result.LockFilePath}");
+                }
+            }
         }
     }
 }
