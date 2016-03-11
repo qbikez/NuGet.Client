@@ -43,6 +43,7 @@ namespace NuGet.Protocol
                     return await client.ProcessStreamAsync(
                         uri: uri,
                         ignoreNotFounds: true,
+                        bufferContent: false,
                         process: async packageStream =>
                         {
                             if (packageStream == null)
@@ -50,7 +51,9 @@ namespace NuGet.Protocol
                                 return new DownloadResourceResult(DownloadResourceResultStatus.NotFound);
                             }
 
-                            return await GlobalPackagesFolderUtility.AddPackageAsync(identity,
+                            return await GlobalPackagesFolderUtility.AddPackageAsync(
+                                client.DownloadUtility,
+                                identity,
                                 packageStream,
                                 settings,
                                 logger,
