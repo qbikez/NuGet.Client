@@ -44,7 +44,7 @@ namespace NuGet.Protocol.Core.v3.Tests
         }
 
         [Fact]
-        public async Task DownloadUtility_TimesOut()
+        public async Task DownloadUtility_TimesOutDownload()
         {
             // Arrange
             var target = new DownloadUtility { DownloadTimeout = TimeSpan.FromMilliseconds(500) };
@@ -65,6 +65,36 @@ namespace NuGet.Protocol.Core.v3.Tests
         }
 
         [Fact]
+        public async Task DownloadUtility_TimesOutBufferAndProcess()
+        {
+            // Arrange
+            var target = new DownloadUtility { DownloadTimeout = TimeSpan.FromMilliseconds(500) };
+            var content = "test content";
+            var source = new SlowStream(new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+                DelayPerByte = TimeSpan.FromMilliseconds(100)
+            };
+            var processed = false;
+
+            // Act & Assert
+            var actual = await Assert.ThrowsAsync<TimeoutException>(async () =>
+            {
+                await target.BufferAndProcessAsync(
+                    source,
+                    stream =>
+                    {
+                        processed = true;
+                        return Task.FromResult(0);
+                    },
+                    "test",
+                    CancellationToken.None);
+            });
+
+            Assert.False(processed, "The content should not have been processed because the buffering should have timed out.");
+            Assert.Equal("The download of 'test' took more than 500ms and therefore timed out.", actual.Message);
+        }
+
+        [Fact]
         public async Task DownloadUtility_AllowsNormalDownload()
         {
             // Arrange
@@ -79,6 +109,25 @@ namespace NuGet.Protocol.Core.v3.Tests
             // Assert
             var actual = Encoding.UTF8.GetString(destination.ToArray());
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task DownloadUtility_AllowsNormalBufferAndProcess()
+        {
+            // Arrange
+            var target = new DownloadUtility();
+            var expected = "test content";
+            var source = new MemoryStream(Encoding.UTF8.GetBytes(expected));
+
+            // Act
+            var output = await target.BufferAndProcessAsync(
+                source,
+                stream => new StreamReader(stream, Encoding.UTF8).ReadToEndAsync(),
+                "test",
+                CancellationToken.None);
+
+            // Assert
+            Assert.Equal(expected, output);
         }
 
         private static void VerifyEnvironmentVariable(string value, TimeSpan expected)
