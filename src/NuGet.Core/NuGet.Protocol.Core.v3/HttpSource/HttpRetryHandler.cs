@@ -105,7 +105,7 @@ namespace NuGet.Protocol
                             success = false;
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception e) when (!(e is OperationCanceledException))
                     {
                         success = false;
 
