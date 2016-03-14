@@ -57,9 +57,34 @@ namespace NuGet.ProjectModel.Test
             // Act
             var spec = JsonPackageSpecReader.GetPackageSpec(json, "TestProject", "project.json");
             var range = spec.Dependencies.Single().LibraryRange.VersionRange;
+            var allowsProject = spec.Dependencies.Single().LibraryRange.TypeConstraintAllows(LibraryDependencyTarget.Project);
 
             // Assert
             Assert.Equal(VersionRange.All, range);
+            Assert.True(allowsProject);
+        }
+
+        [Fact]
+        public void PackageSpecReader_ProjectMissingVersionAndTarget()
+        {
+            // Arrange
+            var json = @"{
+                          ""dependencies"": {
+                                ""packageA"": """"
+                            },
+                            ""frameworks"": {
+                                ""net46"": {}
+                            }
+                        }";
+
+            // Act
+            var spec = JsonPackageSpecReader.GetPackageSpec(json, "TestProject", "project.json");
+            var range = spec.Dependencies.Single().LibraryRange.VersionRange;
+            var allowsProject = spec.Dependencies.Single().LibraryRange.TypeConstraintAllows(LibraryDependencyTarget.Project);
+
+            // Assert
+            Assert.Equal(VersionRange.All, range);
+            Assert.True(allowsProject);
         }
 
         [Fact]

@@ -295,18 +295,19 @@ namespace NuGet.ProjectModel
                     // Projects and References may have empty version ranges, Packages may not
                     if (dependencyVersionRange == null)
                     {
-                        if ((targetFlagsValue & LibraryDependencyTarget.Package) == LibraryDependencyTarget.Package)
+                        if (((targetFlagsValue & LibraryDependencyTarget.Project) == LibraryDependencyTarget.Project)
+                            || ((targetFlagsValue & LibraryDependencyTarget.Reference) == LibraryDependencyTarget.Reference))
                         {
+                            // Projects and references with no version property allow all versions
+                            dependencyVersionRange = VersionRange.All;
+                            targetFlagsValue = targetFlagsValue & (LibraryDependencyTarget.Project | LibraryDependencyTarget.Reference);
+                        }
+                        else {
                             throw FileFormatException.Create(
                                 new ArgumentException(Strings.MissingVersionOnDependency),
                                 dependency.Value,
                                 packageSpecPath);
-                        }
-                        else
-                        {
-                            // Projects and references with no version property allow all versions
-                            dependencyVersionRange = VersionRange.All;
-                        }
+                       }
                     }
 
                     // the dependency flags are: Include flags - Exclude flags
@@ -452,7 +453,7 @@ namespace NuGet.ProjectModel
                         token.Value<string>()
                     };
             }
-            else if(token.Type == JTokenType.Array)
+            else if (token.Type == JTokenType.Array)
             {
                 values = token.ValueAsArray<string>();
             }
@@ -568,7 +569,7 @@ namespace NuGet.ProjectModel
             if (framework.Any(p => !p.IsSpecificFramework))
             {
                 throw FileFormatException.Create(
-                           string.Format(Strings.Log_InvalidImportFramework, importsProperty.ToString().Replace(Environment.NewLine,string.Empty),
+                           string.Format(Strings.Log_InvalidImportFramework, importsProperty.ToString().Replace(Environment.NewLine, string.Empty),
                                             PackageSpec.PackageSpecFileName),
                            importsProperty,
                            packageSpec.FilePath);
